@@ -1,0 +1,178 @@
+# ============================================
+# Node & npm
+# ============================================
+node_modules/
+npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+
+# ============================================
+# Build Output
+# ============================================
+dist/
+build/
+.next/
+out/
+coverage/
+
+# ============================================
+# Environment Variables
+# ============================================
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
+.env.test.local
+
+# ============================================
+# IDE & Editor
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.sublime-workspace
+*.sublime-project
+.sts4-cache/
+
+# ============================================
+# IDE - Visual Studio Code
+# ============================================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# ============================================
+# IDE - JetBrains
+# ============================================
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ============================================
+# Temporary Files
+# ============================================
+*.bak
+*.tmp
+*.temp
+*.orig
+*.rej
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+
+# ============================================
+# Package Manager
+# ============================================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnpm-store/
+
+# ============================================
+# Logs
+# ============================================
+logs/
+logs/*
+*.log
+lerna-debug.log*
+
+# ============================================
+# Runtime Data
+# ============================================
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ============================================
+# Testing
+# ============================================
+coverage/
+.nyc_output/
+.jest-cache/
+jest.config.js.map
+
+# ============================================
+# Vite
+# ============================================
+.vite/
+dist/
+
+# ============================================
+# Cache
+# ============================================
+.cache/
+.eslintcache
+.prettiercache
+
+# ============================================
+# Dependencies
+# ============================================
+npm-shrinkwrap.json
+
+# ============================================
+# Development Tools
+# ============================================
+.env.example
+.editorconfig
+
+# ============================================
+# Private & Sensitive
+# ============================================
+private/
+secrets/
+*.pem
+*.key
+*.crt
+credentials.json
+api-key*
+token*
+
+# ============================================
+# Database (if any local DB)
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# Backup Files
+# ============================================
+*.backup
+*.bckp
+*.old
+
+# ============================================
+# Editor Backups
+# ============================================
+*~
+*.swp
+*.swo
+*~.*

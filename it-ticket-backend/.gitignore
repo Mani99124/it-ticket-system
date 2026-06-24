@@ -1,0 +1,177 @@
+# ============================================
+# Maven & Build
+# ============================================
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.flattened-pom.xml
+
+# ============================================
+# IDE
+# ============================================
+.idea/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+.classpath
+.project
+.settings/
+.vscode/
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+.sts4-cache/
+.factorypath
+
+# ============================================
+# Java
+# ============================================
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+hs_err_pid*
+.mtj.tmp/
+
+# ============================================
+# Spring Boot
+# ============================================
+application-local.properties
+application-dev.properties
+application-prod.properties
+!application.properties
+!application-dev.properties
+!application-prod.properties
+
+# ============================================
+# Gradle
+# ============================================
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# ============================================
+# Environment & Configuration
+# ============================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.pfx
+secrets/
+config/private/
+
+# ============================================
+# Logs
+# ============================================
+logs/
+*.log
+*.log.*
+log4j.properties
+
+# ============================================
+# Database
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+data/
+db/
+
+# ============================================
+# Redis
+# ============================================
+dump.rdb
+appendonly.aof
+
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
+.dockerignore
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.bak
+*.tmp
+
+# ============================================
+# Temporary Files
+# ============================================
+*.swp
+*.swo
+*~
+.~*
+*.orig
+*.rej
+
+# ============================================
+# Generated Files
+# ============================================
+src/main/generated/
+src/test/generated/
+generated-sources/
+generated-test-sources/
+*.generated.java
+
+# ============================================
+# Node (for any frontend tools in backend)
+# ============================================
+node_modules/
+npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================
+# Debugging
+# ============================================
+.jdebug.session
+.debug/
+debug-output/
+
+# ============================================
+# Build Artifacts
+# ============================================
+dist/
+build/
+out/
+bin/
+
+# ============================================
+# Checkstyle & Code Quality
+# ============================================
+checkstyle-result.xml
+coverage/
+.sonar/
+.sonarlint/
+
+# ============================================
+# Private & Sensitive
+# ============================================
+private/
+secrets.properties
+keystore.jks
+*.keystore
+certificate/
+credentials.json
+api-key*
