@@ -11,7 +11,7 @@ export const getAccessToken = () => {
 }
 
 const axiosInstance = axios.create({
-  baseURL: '',
+  baseURL: import.meta.env.VITE_API_URL,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true // Required for sending/receiving cookies
 })
