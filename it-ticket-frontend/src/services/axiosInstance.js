@@ -4,7 +4,7 @@ let accessToken = '' // In-memory storage for the access token
 
 export const setAccessToken = (token) => {
   accessToken = token
-}
+}                                                
 
 export const getAccessToken = () => {
   return accessToken
@@ -12,6 +12,7 @@ export const getAccessToken = () => {
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true // Required for sending/receiving cookies
 })
@@ -59,6 +60,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         // Call refresh endpoint - browser will automatically send the refreshToken cookie
+        console.log(import.meta.env.VITE_API_URL)
         const res = await axiosInstance.post('/api/auth/refresh')
         const newAccess = res.data.data.accessToken
         
