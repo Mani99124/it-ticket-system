@@ -22,7 +22,8 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Void>> registerUser(@Valid @RequestBody RegisterRequest request) {
         authService.registerUser(request);
-        return ResponseEntity.ok(ApiResponse.success("Registration successful. Please verify your email with the OTP sent."));
+        return ResponseEntity
+                .ok(ApiResponse.success("Registration successful. Please verify your email with the OTP sent."));
     }
 
     @PostMapping("/register/agent")
@@ -74,21 +75,47 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Logged out successfully."));
     }
 
-    private void setRefreshTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("refreshToken", token);
+    private void setRefreshTokenCookie(
+            HttpServletResponse response,
+            String token) {
+        Cookie cookie = new Cookie(
+                "refreshToken",
+                token);
+
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // Set to true in production with HTTPS
+
+        cookie.setSecure(true);
+
         cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
-        cookie.setAttribute("SameSite", "Lax");
+
+        cookie.setMaxAge(
+                7 * 24 * 60 * 60);
+
+        cookie.setAttribute(
+                "SameSite",
+                "None");
+
         response.addCookie(cookie);
     }
 
-    private void clearRefreshTokenCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("refreshToken", null);
+    private void clearRefreshTokenCookie(
+            HttpServletResponse response) {
+        Cookie cookie = new Cookie(
+                "refreshToken",
+                null);
+
         cookie.setHttpOnly(true);
+
+        cookie.setSecure(true);
+
         cookie.setPath("/");
+
+        cookie.setAttribute(
+                "SameSite",
+                "None");
+
         cookie.setMaxAge(0);
+
         response.addCookie(cookie);
     }
 
