@@ -20,163 +20,189 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+        private final AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Void>> registerUser(
-            @Valid @RequestBody RegisterRequest request) {
-        authService.registerUser(request);
+        @PostMapping("/register")
+        public ResponseEntity<ApiResponse<Void>> registerUser(
+                        @Valid @RequestBody RegisterRequest request) {
+                authService.registerUser(request);
 
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Registration successful. Please verify your email with the OTP sent."));
-    }
-
-    @PostMapping("/register/agent")
-    public ResponseEntity<ApiResponse<Void>> registerAgent(
-            @Valid @RequestBody RegisterRequest request) {
-        authService.registerAgent(request);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Agent registration submitted. Awaiting admin approval."));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login(
-            @Valid @RequestBody LoginRequest request,
-            HttpServletResponse response) {
-
-        AuthResponse authResponse = authService.login(request);
-
-        setRefreshTokenCookie(
-                response,
-                authResponse.getRefreshTokenString());
-
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Login successful",
-                        authResponse));
-    }
-
-    @PostMapping("/verify-otp")
-    public ResponseEntity<ApiResponse<Void>> verifyOtp(
-            @Valid @RequestBody OtpVerifyRequest request) {
-
-        authService.verifyOtp(request);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Email verified successfully. You can now login."));
-    }
-
-    @PostMapping("/resend-otp")
-    public ResponseEntity<ApiResponse<Void>> resendOtp(
-            @Valid @RequestBody ResendOtpRequest request) {
-
-        authService.resendOtp(request);
-
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "OTP resent successfully."));
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<AuthResponse>> refresh(
-            HttpServletRequest request,
-            HttpServletResponse response) {
-
-        String refreshToken = getRefreshTokenFromCookie(request);
-
-        AuthResponse authResponse = authService.refresh(refreshToken);
-
-        setRefreshTokenCookie(
-                response,
-                authResponse.getRefreshTokenString());
-
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Token refreshed",
-                        authResponse));
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(
-            HttpServletRequest request,
-            HttpServletResponse response) {
-
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader != null &&
-                authHeader.startsWith("Bearer ")) {
-
-            authService.logout(
-                    authHeader.substring(7));
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Registration successful. Please verify your email with the OTP sent."));
         }
 
-        clearRefreshTokenCookie(response);
+        @PostMapping("/register/agent")
+        public ResponseEntity<ApiResponse<Void>> registerAgent(
+                        @Valid @RequestBody RegisterRequest request) {
+                authService.registerAgent(request);
 
-        return ResponseEntity.ok(
-                ApiResponse.success(
-                        "Logged out successfully."));
-    }
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Agent registration submitted. Awaiting admin approval."));
+        }
 
-    private void setRefreshTokenCookie(
-            HttpServletResponse response,
-            String token) {
+        @PostMapping("/login")
+        public ResponseEntity<ApiResponse<AuthResponse>> login(
+                        @Valid @RequestBody LoginRequest request,
+                        HttpServletResponse response) {
 
-        ResponseCookie cookie = ResponseCookie.from(
-                "refreshToken",
-                token)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(7 * 24 * 60 * 60)
-                .build();
+                AuthResponse authResponse = authService.login(request);
 
-        response.addHeader(
-                HttpHeaders.SET_COOKIE,
-                cookie.toString());
-    }
+                setRefreshTokenCookie(
+                                response,
+                                authResponse.getRefreshTokenString());
 
-    private void clearRefreshTokenCookie(
-            HttpServletResponse response) {
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Login successful",
+                                                authResponse));
+        }
 
-        ResponseCookie cookie = ResponseCookie.from(
-                "refreshToken",
-                "")
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path("/")
-                .maxAge(0)
-                .build();
+        @PostMapping("/verify-otp")
+        public ResponseEntity<ApiResponse<Void>> verifyOtp(
+                        @Valid @RequestBody OtpVerifyRequest request) {
 
-        response.addHeader(
-                HttpHeaders.SET_COOKIE,
-                cookie.toString());
-    }
+                authService.verifyOtp(request);
 
-    private String getRefreshTokenFromCookie(
-            HttpServletRequest request) {
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Email verified successfully. You can now login."));
+        }
 
-        Cookie[] cookies = request.getCookies();
+        @PostMapping("/resend-otp")
+        public ResponseEntity<ApiResponse<Void>> resendOtp(
+                        @Valid @RequestBody ResendOtpRequest request) {
 
-        if (cookies != null) {
+                authService.resendOtp(request);
 
-            for (Cookie cookie : cookies) {
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "OTP resent successfully."));
+        }
 
-                if ("refreshToken"
-                        .equals(
-                                cookie.getName())) {
+        @PostMapping("/refresh")
+        public ResponseEntity<ApiResponse<AuthResponse>> refresh(
+                        @RequestBody(required = false) RefreshTokenRequest requestBody,
+                        @RequestHeader(value = "Authorization", required = false) String authHeader,
+                        HttpServletRequest request,
+                        HttpServletResponse response) {
 
-                    return cookie.getValue();
+                String refreshToken = resolveRefreshToken(requestBody, authHeader, request);
+
+                AuthResponse authResponse = authService.refresh(refreshToken);
+
+                setRefreshTokenCookie(
+                                response,
+                                authResponse.getRefreshTokenString());
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Token refreshed",
+                                                authResponse));
+        }
+
+        @PostMapping("/logout")
+        public ResponseEntity<ApiResponse<Void>> logout(
+                        HttpServletRequest request,
+                        HttpServletResponse response) {
+
+                String authHeader = request.getHeader("Authorization");
+
+                if (authHeader != null &&
+                                authHeader.startsWith("Bearer ")) {
+
+                        authService.logout(
+                                        authHeader.substring(7));
                 }
-            }
+
+                clearRefreshTokenCookie(response);
+
+                return ResponseEntity.ok(
+                                ApiResponse.success(
+                                                "Logged out successfully."));
         }
 
-        throw new UnauthorizedException(
-                "Refresh token cookie missing");
-    }
+        private void setRefreshTokenCookie(
+                        HttpServletResponse response,
+                        String token) {
+
+                ResponseCookie cookie = ResponseCookie.from(
+                                "refreshToken",
+                                token)
+                                .httpOnly(true)
+                                .secure(true)
+                                .sameSite("None")
+                                .path("/")
+                                .maxAge(7 * 24 * 60 * 60)
+                                .build();
+
+                response.addHeader(
+                                HttpHeaders.SET_COOKIE,
+                                cookie.toString());
+        }
+
+        private void clearRefreshTokenCookie(
+                        HttpServletResponse response) {
+
+                ResponseCookie cookie = ResponseCookie.from(
+                                "refreshToken",
+                                "")
+                                .httpOnly(true)
+                                .secure(true)
+                                .sameSite("None")
+                                .path("/")
+                                .maxAge(0)
+                                .build();
+
+                response.addHeader(
+                                HttpHeaders.SET_COOKIE,
+                                cookie.toString());
+        }
+
+        private String resolveRefreshToken(
+                        RefreshTokenRequest requestBody,
+                        String authHeader,
+                        HttpServletRequest request) {
+
+                if (requestBody != null
+                                && requestBody.getRefreshToken() != null
+                                && !requestBody.getRefreshToken().isBlank()) {
+                        return requestBody.getRefreshToken().trim();
+                }
+
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                        return authHeader.substring(7).trim();
+                }
+
+                String tokenFromCookie = getRefreshTokenFromCookie(request);
+
+                if (tokenFromCookie != null && !tokenFromCookie.isBlank()) {
+                        return tokenFromCookie.trim();
+                }
+
+                throw new UnauthorizedException(
+                                "Refresh token missing");
+        }
+
+        private String getRefreshTokenFromCookie(
+                        HttpServletRequest request) {
+
+                Cookie[] cookies = request.getCookies();
+
+                if (cookies != null) {
+
+                        for (Cookie cookie : cookies) {
+
+                                if ("refreshToken"
+                                                .equals(
+                                                                cookie.getName())) {
+
+                                        return cookie.getValue();
+                                }
+                        }
+                }
+
+                return null;
+        }
 }

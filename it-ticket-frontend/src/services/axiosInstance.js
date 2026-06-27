@@ -1,13 +1,29 @@
 import axios from 'axios'
 
 let accessToken = '' // In-memory storage for the access token
+let refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') || '' : ''
 
 export const setAccessToken = (token) => {
   accessToken = token
-}                                                
+}
 
 export const getAccessToken = () => {
   return accessToken
+}
+
+export const setRefreshToken = (token) => {
+  refreshToken = token
+  if (typeof window !== 'undefined') {
+    if (token) {
+      localStorage.setItem('refreshToken', token)
+    } else {
+      localStorage.removeItem('refreshToken')
+    }
+  }
+}
+
+export const getRefreshToken = () => {
+  return refreshToken
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://it-ticket-system-1-8hqa.onrender.com'
@@ -20,8 +36,24 @@ const axiosInstance = axios.create({
 
 // Attach access token to every request from memory
 axiosInstance.interceptors.request.use((config) => {
-  // Skip adding Authorization header for refresh requests to avoid header pollution
   if (config.url === '/api/auth/refresh' || config.url === 'api/auth/refresh') {
+    if (refreshToken && refreshToken !== 'undefined' && refreshToken !== 'null' && refreshToken.trim() !== '') {
+      config.headers.Authorization = `Bearer ${refreshToken}`
+
+      if (!config.data) {
+        config.data = { refreshToken }
+      } else if (typeof config.data === 'string') {
+        try {
+          const parsed = JSON.parse(config.data)
+          parsed.refreshToken = refreshToken
+          config.data = parsed
+        } catch {
+          config.data = { refreshToken }
+        }
+      } else if (typeof config.data === 'object') {
+        config.data = { ...config.data, refreshToken }
+      }
+    }
     return config
   }
 
@@ -64,8 +96,12 @@ axiosInstance.interceptors.response.use(
         console.log(import.meta.env.VITE_API_URL)
         const res = await axiosInstance.post('/api/auth/refresh')
         const newAccess = res.data.data.accessToken
+        const newRefresh = res.data.data.refreshTokenString || res.data.data.refreshToken || ''
         
         setAccessToken(newAccess)
+        if (newRefresh) {
+          setRefreshToken(newRefresh)
+        }
         processQueue(null, newAccess)
         
         original.headers.Authorization = `Bearer ${newAccess}`
@@ -74,6 +110,7 @@ axiosInstance.interceptors.response.use(
         processQueue(err, null)
         // If refresh fails, tokens are probably invalid/expired
         setAccessToken('')
+        setRefreshToken('')
         localStorage.removeItem('user') 
         // We don't force redirect here to allow AuthContext to handle state
         return Promise.reject(err)

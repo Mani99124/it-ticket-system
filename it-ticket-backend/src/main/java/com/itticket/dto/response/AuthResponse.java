@@ -1,6 +1,5 @@
 package com.itticket.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itticket.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +16,5 @@ public class AuthResponse {
     private String name;
     private String email;
     private Role role;
-
-    @JsonIgnore
     private String refreshTokenString;
 }

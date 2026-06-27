@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
-import axiosInstance, { setAccessToken } from '../services/axiosInstance'
+import axiosInstance, { setAccessToken, setRefreshToken } from '../services/axiosInstance'
 
 const AuthContext = createContext(null)
 
@@ -28,6 +28,10 @@ export function AuthProvider({ children }) {
               const res = await axiosInstance.post('/api/auth/refresh')
               if (res.data.data.accessToken) {
                 setAccessToken(res.data.data.accessToken)
+              }
+              const nextRefreshToken = res.data.data.refreshTokenString || res.data.data.refreshToken || ''
+              if (nextRefreshToken) {
+                setRefreshToken(nextRefreshToken)
               }
             } catch (err) {
               console.warn('Silent refresh failed on mount:', err.message)
@@ -66,6 +70,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('user', JSON.stringify(userInfo))
     setUser(userInfo)
     setAccessToken(authData.accessToken)
+    setRefreshToken(authData.refreshTokenString || authData.refreshToken || '')
   }, [])
 
   const logout = useCallback(async () => {
@@ -74,6 +79,7 @@ export function AuthProvider({ children }) {
     } catch (_) {}
     
     setAccessToken('')
+    setRefreshToken('')
     localStorage.removeItem('user')
     setUser(null)
     
