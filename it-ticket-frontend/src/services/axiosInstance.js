@@ -10,9 +10,10 @@ export const getAccessToken = () => {
   return accessToken
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://it-ticket-system-1-8hqa.onrender.com'
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  
+  baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true // Required for sending/receiving cookies
 })
