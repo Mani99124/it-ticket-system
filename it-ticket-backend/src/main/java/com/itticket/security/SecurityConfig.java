@@ -80,7 +80,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:3000",
-                "https://it-ticket-system-git-main-mani99124s-projects.vercel.app"));
+                "https://it-ticket-system-git-main-mani99124s-projects.vercel.app",
+                "https://it-ticket-system-two.vercel.app"));
 
         config.setAllowedMethods(List.of(
                 "GET",
