@@ -22,7 +22,13 @@ public class EmailService {
     @Value("${spring.mail.username:}")
     private String fromEmail;
 
-    @Value("${app.mail.enabled:true}")
+    @Value("${spring.mail.host:}")
+    private String mailHost;
+
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
+
+    @Value("${app.mail.enabled:false}")
     private boolean mailEnabled;
 
     @Async("emailTaskExecutor")
@@ -127,8 +133,7 @@ public class EmailService {
             return;
         }
 
-        if (!StringUtils.hasText(fromEmail) || !StringUtils.hasText(to)) {
-            log.warn("Mail configuration is incomplete. Skipping email to {} with subject '{}'", to, subject);
+        if (!isMailConfigured(to, subject)) {
             return;
         }
 
@@ -143,5 +148,32 @@ public class EmailService {
         } catch (Exception e) {
             log.error("Failed to send email to {}: {}", to, e.getMessage());
         }
+    }
+
+    private boolean isMailConfigured(String to, String subject) {
+        if (!StringUtils.hasText(fromEmail) || !StringUtils.hasText(mailHost) || !StringUtils.hasText(mailPassword) || !StringUtils.hasText(to)) {
+            log.warn("Mail configuration is incomplete. Skipping email to {} with subject '{}'", to, subject);
+            return false;
+        }
+
+        if (isPlaceholderValue(fromEmail) || isPlaceholderValue(mailHost) || isPlaceholderValue(mailPassword)) {
+            log.warn("Mail configuration contains placeholder values. Skipping email to {} with subject '{}'", to, subject);
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isPlaceholderValue(String value) {
+        if (!StringUtils.hasText(value)) {
+            return true;
+        }
+
+        String normalized = value.trim().toLowerCase();
+        return normalized.contains("your-")
+                || normalized.contains("change-me")
+                || normalized.contains("example")
+                || normalized.contains("placeholder")
+                || normalized.contains("dummy");
     }
 }
