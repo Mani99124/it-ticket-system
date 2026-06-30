@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -24,8 +25,27 @@ public class JwtTokenProvider {
     private long refreshTokenExpiry;
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        String resolvedSecret = jwtSecret;
+        if (!StringUtils.hasText(resolvedSecret)) {
+            resolvedSecret = "change-me-in-production";
+        }
+
+        byte[] keyBytes = Decoders.BASE64.decode(resolveBase64Secret(resolvedSecret));
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private String resolveBase64Secret(String secret) {
+        if (StringUtils.hasText(secret)) {
+            try {
+                Decoders.BASE64.decode(secret);
+                return secret;
+            } catch (IllegalArgumentException ignored) {
+                return java.util.Base64.getEncoder()
+                        .encodeToString(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+        }
+        return java.util.Base64.getEncoder()
+                .encodeToString("change-me-in-production".getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
     public String generateAccessToken(String email, String role, Long userId) {
