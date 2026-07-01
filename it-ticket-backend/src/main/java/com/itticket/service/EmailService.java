@@ -189,7 +189,24 @@ public class EmailService {
             log.info("Email sent successfully → {}", to);
 
         } catch (Exception e) {
-            log.error("Email sending failed", e);
+
+            log.error("Email sending failed");
+
+            Throwable current = e;
+
+            while (current != null) {
+
+                log.error(
+                        "CAUSE → {} | {}",
+                        current.getClass().getName(),
+                        current.getMessage());
+
+                current = current.getCause();
+            }
+
+            log.error("FULL STACK TRACE", e);
+
+            e.printStackTrace();
         }
     }
 }
