@@ -189,13 +189,7 @@ public class EmailService {
             log.info("Email sent successfully → {}", to);
 
         } catch (Exception e) {
-
-            log.error(
-                    "SMTP send failed | host={} | port={} | error={}",
-                    mailHost,
-                    mailPort,
-                    e.getClass().getSimpleName(),
-                    e);
+            log.error("Email sending failed", e);
         }
     }
 }
