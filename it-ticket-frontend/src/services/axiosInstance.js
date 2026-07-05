@@ -112,7 +112,14 @@ axiosInstance.interceptors.response.use(
         setAccessToken('')
         setRefreshToken('')
         localStorage.removeItem('user') 
-        // We don't force redirect here to allow AuthContext to handle state
+        
+        // Force redirect to login page if we are not already on an auth page
+        if (typeof window !== 'undefined' && 
+            window.location.pathname !== '/login' && 
+            window.location.pathname !== '/register' && 
+            window.location.pathname !== '/register/agent') {
+          window.location.href = '/login'
+        }
         return Promise.reject(err)
       } finally {
         isRefreshing = false
