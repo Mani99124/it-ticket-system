@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import OtpVerifyPage from './pages/OtpVerifyPage'
@@ -21,25 +20,8 @@ import { useAuth } from './context/AuthContext'
 
 export default function App() {
   const { loading } = useAuth()
-  const location = useLocation()
-  const previousPathRef = useRef(location.pathname)
-  const [routeLoading, setRouteLoading] = useState(false)
-
-  useEffect(() => {
-    if (previousPathRef.current === location.pathname) return
-
-    previousPathRef.current = location.pathname
-    setRouteLoading(true)
-
-    const timer = setTimeout(() => {
-      setRouteLoading(false)
-    }, 650)
-
-    return () => clearTimeout(timer)
-  }, [location.pathname])
 
   if (loading) return <Preloader />
-  if (routeLoading) return <Preloader message="MANIKANTH" withSidebar />
 
   return (
     <Routes>

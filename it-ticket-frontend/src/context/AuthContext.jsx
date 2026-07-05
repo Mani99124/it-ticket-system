@@ -14,8 +14,6 @@ export function AuthProvider({ children }) {
     initRef.current = true
 
     const initAuth = async () => {
-      const minimumPreload = new Promise((resolve) => setTimeout(resolve, 1200))
-
       try {
         const stored = localStorage.getItem('user')
         if (stored) {
@@ -52,7 +50,6 @@ export function AuthProvider({ children }) {
           }
         }
       } finally {
-        await minimumPreload
         setLoading(false)
       }
     }
