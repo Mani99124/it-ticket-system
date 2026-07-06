@@ -21,8 +21,8 @@ export default function RegisterPage({ isAgent = false }) {
         navigate('/login')
       } else {
         await authService.registerUser(form)
-        toast.success('Registration successful! You can now log in.')
-        navigate('/login')
+        toast.success('Registration successful! Please verify your email.')
+        navigate('/verify-otp', { state: { email: form.email } })
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed')

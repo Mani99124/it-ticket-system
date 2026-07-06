@@ -44,12 +44,12 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
-                .status(UserStatus.ACTIVE)
+                .status(UserStatus.UNVERIFIED)
                 .build();
         userRepository.save(user);
 
-        // String otp = otpService.generateAndStoreOtp(request.getEmail());
-        // emailService.sendOtpEmail(request.getEmail(), otp);
+        String otp = otpService.generateAndStoreOtp(request.getEmail());
+        emailService.sendOtpEmail(request.getEmail(), otp);
     }
 
     // @Transactional
