@@ -25,8 +25,11 @@ public class EmailService {
     @Value("${app.brevo.api-key:}")
     private String brevoApiKey;
 
-    @Value("${spring.mail.username:}")
-    private String fromEmail;
+    @Value("${app.brevo.sender-email:itticket54@gmail.com}")
+    private String senderEmail;
+
+    @Value("${app.brevo.sender-name:IT Ticket System}")
+    private String senderName;
 
     @Value("${app.mail.enabled:true}")
     private boolean mailEnabled;
@@ -163,8 +166,8 @@ public class EmailService {
             return;
         }
 
-        if (!StringUtils.hasText(fromEmail)) {
-            log.error("MAIL_USERNAME missing");
+        if (!StringUtils.hasText(senderEmail)) {
+            log.error("app.brevo.sender-email (BREVO_SENDER_EMAIL) missing");
             return;
         }
 
@@ -179,14 +182,14 @@ public class EmailService {
         }
 
         try {
-            log.info("Sending mail via Brevo HTTP API | from={} | to={}", fromEmail, to);
+            log.info("Sending mail via Brevo HTTP API | sender={} | to={}", senderEmail, to);
 
             ObjectNode rootNode = objectMapper.createObjectNode();
 
             // sender
             ObjectNode senderNode = objectMapper.createObjectNode();
-            senderNode.put("name", "IT Support Team");
-            senderNode.put("email", fromEmail);
+            senderNode.put("name", senderName);
+            senderNode.put("email", senderEmail);
             rootNode.set("sender", senderNode);
 
             // to

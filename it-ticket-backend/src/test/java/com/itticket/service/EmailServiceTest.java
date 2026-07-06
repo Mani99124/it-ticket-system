@@ -16,7 +16,7 @@ class EmailServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(emailService, "mailEnabled", false);
-        ReflectionTestUtils.setField(emailService, "fromEmail", "noreply@example.com");
+        ReflectionTestUtils.setField(emailService, "senderEmail", "noreply@example.com");
     }
 
     @Test
