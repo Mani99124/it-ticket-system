@@ -3,33 +3,43 @@ package com.itticket.service;
 import com.itticket.entity.Ticket;
 import com.itticket.entity.TicketComment;
 import com.itticket.entity.User;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${app.brevo.api-key:}")
+    private String brevoApiKey;
 
     @Value("${spring.mail.username:}")
     private String fromEmail;
 
-    @Value("${spring.mail.host:}")
-    private String mailHost;
-
-    @Value("${spring.mail.port:587}")
-    private int mailPort;
-
     @Value("${app.mail.enabled:true}")
     private boolean mailEnabled;
+
+    private final HttpClient httpClient;
+    private final ObjectMapper objectMapper;
+
+    public EmailService() {
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
+        this.objectMapper = new ObjectMapper();
+    }
 
     @Async("emailTaskExecutor")
     public void sendOtpEmail(String toEmail, String otp) {
@@ -158,8 +168,8 @@ public class EmailService {
             return;
         }
 
-        if (!StringUtils.hasText(mailHost)) {
-            log.error("SPRING_MAIL_HOST missing");
+        if (!StringUtils.hasText(brevoApiKey)) {
+            log.error("app.brevo.api-key (BREVO_API_KEY) missing");
             return;
         }
 
@@ -169,44 +179,48 @@ public class EmailService {
         }
 
         try {
+            log.info("Sending mail via Brevo HTTP API | from={} | to={}", fromEmail, to);
 
-            log.info(
-                    "Sending mail | host={} | port={} | from={} | to={}",
-                    mailHost,
-                    mailPort,
-                    fromEmail,
-                    to);
+            ObjectNode rootNode = objectMapper.createObjectNode();
 
-            SimpleMailMessage message = new SimpleMailMessage();
+            // sender
+            ObjectNode senderNode = objectMapper.createObjectNode();
+            senderNode.put("name", "IT Support Team");
+            senderNode.put("email", fromEmail);
+            rootNode.set("sender", senderNode);
 
-            message.setFrom(fromEmail);
-            message.setTo(to);
-            message.setSubject(subject);
-            message.setText(body);
+            // to
+            ArrayNode toArrayNode = objectMapper.createArrayNode();
+            ObjectNode recipientNode = objectMapper.createObjectNode();
+            recipientNode.put("email", to);
+            toArrayNode.add(recipientNode);
+            rootNode.set("to", toArrayNode);
 
-            mailSender.send(message);
+            // subject & textContent
+            rootNode.put("subject", subject);
+            rootNode.put("textContent", body);
 
-            log.info("Email sent successfully → {}", to);
+            String jsonPayload = objectMapper.writeValueAsString(rootNode);
 
-        } catch (Exception e) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("api-key", brevoApiKey)
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
 
-            log.error("Email sending failed");
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            Throwable current = e;
-
-            while (current != null) {
-
-                log.error(
-                        "CAUSE → {} | {}",
-                        current.getClass().getName(),
-                        current.getMessage());
-
-                current = current.getCause();
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("Email sent successfully to {} via Brevo API, status={}", to, response.statusCode());
+            } else {
+                log.error("Failed to send email via Brevo API: Status Code = {}, Response = {}",
+                        response.statusCode(), response.body());
             }
 
-            log.error("FULL STACK TRACE", e);
-
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("Email sending failed via Brevo HTTP API", e);
         }
     }
 }
